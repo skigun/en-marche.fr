@@ -194,4 +194,5 @@ workflows:
                         only:
                             - develop
                             - release
+                            - partial-release
                             - master
