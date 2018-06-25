@@ -1,11 +1,13 @@
 <?php
 
 use AppBundle\Entity\Adherent;
+use AppBundle\Entity\CitizenAction;
 use AppBundle\Entity\CitizenProject;
 use AppBundle\Entity\Committee;
 use AppBundle\Entity\Event;
 use AppBundle\Event\EventEvent;
 use AppBundle\Events;
+use AppBundle\CitizenAction\CitizenActionEvent;
 use AppBundle\CitizenProject\CitizenProjectEvent;
 use AppBundle\CitizenProject\CitizenProjectWasCreatedEvent;
 use AppBundle\CitizenProject\CitizenProjectWasUpdatedEvent;
@@ -41,6 +43,7 @@ class SyncWithAPIContext implements Context
      */
     public function iDispatchCommitteeEvent(string $event, string $committeeName): void
     {
+        /** @var Committee $committee */
         $committee = $this->doctrine->getRepository(Committee::class)->findOneBy(['name' => $committeeName]);
 
         $this->dispatcher->dispatch($event, new CommitteeEvent($committee));
@@ -51,6 +54,7 @@ class SyncWithAPIContext implements Context
      */
     public function iDispatchEventEvent(string $event, string $eventName): void
     {
+        /** @var Event $committeeEvent */
         $committeeEvent = $this->doctrine->getRepository(Event::class)->findOneBy(['name' => $eventName]);
 
         $this->dispatcher->dispatch($event, new EventEvent(null, $committeeEvent));
@@ -85,5 +89,16 @@ class SyncWithAPIContext implements Context
         }
 
         $this->dispatcher->dispatch($event, $citizenProjectEvent);
+    }
+
+    /**
+     * @When I dispatch the :event citizen action event with :citizenActionName
+     */
+    public function iDispatchCitizenActionEvent(string $event, string $citizenActionName): void
+    {
+        /** @var CitizenAction $citizenAction */
+        $citizenAction = $this->doctrine->getRepository(CitizenAction::class)->findOneBy(['name' => $citizenActionName]);
+
+        $this->dispatcher->dispatch($event, new CitizenActionEvent($citizenAction));
     }
 }

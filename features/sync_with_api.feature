@@ -104,3 +104,33 @@ Feature:
       And "api_sync" should have message below:
         | routing_key             | body                                            |
         | citizen_project.deleted | {"uuid":"aa364092-3999-4102-930c-f711ef971195"} |
+
+  Scenario Outline: Publish message on citizen action created|updated
+    Given the following fixtures are loaded:
+      | LoadAdherentData              |
+      | LoadCitizenProjectData        |
+      | LoadCitizenActionCategoryData |
+      | LoadCitizenActionData         |
+    And I clean the "api_sync" queue
+    When I dispatch the "<event>" citizen action event with "Projet citoyen de Zürich"
+    Then "api_sync" should have 1 message
+    And "api_sync" should have message below:
+      | routing_key   | body                                                                                                                                                                                                                                                                                                                                                           |
+      | <routing_key> | {"uuid":"3f46976e-e76a-476e-86d7-575c6d3bc15f","country":"CH","zipCode":"8057","city":"Z\u00fcrich","latitude":"47.395004","longitude":"8.538380","name":"Projet citoyen de Z\u00fcrich","slug":"2018-06-28-projet-citoyen-de-zurich","beginAt":"2018-06-28T09:30:00+02:00","finishAt":"2018-06-28T19:00:00+02:00","participantsCount":1,"status":"SCHEDULED"} |
+    Examples:
+      | event                  | routing_key            |
+      | citizen_action.created | citizen_action.created |
+      | citizen_action.updated | citizen_action.updated |
+
+  Scenario: Publish message on citizen action deleted
+    Given the following fixtures are loaded:
+      | LoadAdherentData              |
+      | LoadCitizenProjectData        |
+      | LoadCitizenActionCategoryData |
+      | LoadCitizenActionData         |
+    And I clean the "api_sync" queue
+    When I dispatch the "citizen_action.deleted" citizen action event with "Projet citoyen de Zürich"
+    Then "api_sync" should have 1 message
+    And "api_sync" should have message below:
+      | routing_key             | body                                           |
+      | citizen_action.deleted | {"uuid":"3f46976e-e76a-476e-86d7-575c6d3bc15f"} |
