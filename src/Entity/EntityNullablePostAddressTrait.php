@@ -6,6 +6,7 @@ use Algolia\AlgoliaSearchBundle\Mapping\Annotation as Algolia;
 use AppBundle\Address\NullableAddress;
 use AppBundle\Geocoder\Coordinates;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as JMS;
 use Symfony\Component\Intl\Intl;
 
 trait EntityNullablePostAddressTrait

@@ -26,3 +26,81 @@ Feature:
     And "api_sync" should have message below:
       | routing_key  | body                                            |
       | user.deleted | {"uuid":"313bd28f-efc8-57c9-8ab7-2106c8be9697"} |
+
+  Scenario Outline: Publish message on committee created|updated
+    Given the following fixtures are loaded:
+      | LoadAdherentData |
+    And I clean the "api_sync" queue
+    When I dispatch the "<event>" committee event with "En Marche Paris 8"
+    Then "api_sync" should have 1 message
+    And "api_sync" should have message below:
+      | routing_key   | body                                                                                                                                                                                                                                                                                                                 |
+      | <routing_key> | {"uuid":"515a56c0-bde8-56ef-b90c-4745b1c93818","name":"En Marche Paris 8","slug":"en-marche-paris-8","status":"APPROVED","membersCount":4,"tags":["75008","75"],"longitude":"2.303243","latitude":"48.870506","country":"FR","address":"60 avenue des Champs-\u00c9lys\u00e9es","zipCode":"75008","city":"Paris 8e"} |
+    Examples:
+      | event             | routing_key       |
+      | committee.created | committee.created |
+      | committee.updated | committee.updated |
+
+  Scenario: Publish message on committee deleted
+    Given the following fixtures are loaded:
+      | LoadAdherentData |
+    And I clean the "api_sync" queue
+    When I dispatch the "committee.deleted" committee event with "En Marche Paris 8"
+    Then "api_sync" should have 1 message
+    And "api_sync" should have message below:
+      | routing_key       | body                                            |
+      | committee.deleted | {"uuid":"515a56c0-bde8-56ef-b90c-4745b1c93818"} |
+
+  Scenario Outline: Publish message on event created|updated
+    Given the following fixtures are loaded:
+      | LoadAdherentData      |
+      | LoadEventCategoryData |
+      | LoadEventData         |
+    And I clean the "api_sync" queue
+    When I dispatch the "<event>" event event with "Réunion de réflexion parisienne"
+    Then "api_sync" should have 1 message
+    And "api_sync" should have message below:
+      | routing_key   | body                                                                                                                                                                                                                                                                                                                 |
+      | <routing_key> | {"uuid":"1fc69fd0-2b34-4bd4-a0cc-834480480934","country":"FR","address":"60 avenue des Champs-\u00c9lys\u00e9es","zipCode":"75008","city":"Paris 8e","latitude":"48.870506","longitude":"2.303243","name":"R\u00e9union de r\u00e9flexion parisienne","slug":"2018-06-28-reunion-de-reflexion-parisienne","beginAt":"2018-06-28T09:30:00+02:00","finishAt":"2018-06-28T19:00:00+02:00","participantsCount":1,"status":"SCHEDULED","capacity":50,"committeeUuid":"515a56c0-bde8-56ef-b90c-4745b1c93818","categoryName":"Atelier du programme","tags":["75008","75"],"organizerUuid":"a046adbe-9c7b-56a9-a676-6151a6785dda"} |
+    Examples:
+      | event         | routing_key   |
+      | event.created | event.created |
+      | event.updated | event.updated |
+
+  Scenario: Publish message on event deleted
+    Given the following fixtures are loaded:
+      | LoadAdherentData      |
+      | LoadEventCategoryData |
+      | LoadEventData         |
+    And I clean the "api_sync" queue
+    When I dispatch the "event.deleted" event event with "Réunion de réflexion parisienne"
+    Then "api_sync" should have 1 message
+    And "api_sync" should have message below:
+      | routing_key   | body                                            |
+      | event.deleted | {"uuid":"1fc69fd0-2b34-4bd4-a0cc-834480480934"} |
+
+  Scenario Outline: Publish message on citizen project created|updated
+    Given the following fixtures are loaded:
+      | LoadAdherentData       |
+      | LoadCitizenProjectData |
+    And I clean the "api_sync" queue
+    When I dispatch the "<event>" citizen project event with "Le projet citoyen à Paris 8"
+    Then "api_sync" should have 1 message
+    And "api_sync" should have message below:
+      | routing_key   | body                                                                                                                                                                                                                                                                      |
+      | <routing_key> | {"uuid":"aa364092-3999-4102-930c-f711ef971195","name":"Le projet citoyen \u00e0 Paris 8","slug":"le-projet-citoyen-a-paris-8","status":"APPROVED","membersCount":4,"country":"FR","address":"60 avenue des Champs-\u00c9lys\u00e9es","zipCode":"75008","city":"Paris 8e"} |
+    Examples:
+      | event                   | routing_key             |
+      | citizen_project.created | citizen_project.created |
+      | citizen_project.updated | citizen_project.updated |
+
+    Scenario: Publish message on citizen project deleted
+      Given the following fixtures are loaded:
+        | LoadAdherentData       |
+        | LoadCitizenProjectData |
+      And I clean the "api_sync" queue
+      When I dispatch the "citizen_project.deleted" citizen project event with "Le projet citoyen à Paris 8"
+      Then "api_sync" should have 1 message
+      And "api_sync" should have message below:
+        | routing_key             | body                                            |
+        | citizen_project.deleted | {"uuid":"aa364092-3999-4102-930c-f711ef971195"} |
