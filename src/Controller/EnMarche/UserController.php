@@ -3,17 +3,21 @@
 namespace AppBundle\Controller\EnMarche;
 
 use AppBundle\Entity\Adherent;
+use AppBundle\Entity\AdherentChangeEmailToken;
 use AppBundle\Entity\Unregistration;
+use AppBundle\Form\AdherentChangeEmailType;
 use AppBundle\Form\AdherentChangePasswordType;
 use AppBundle\Form\AdherentEmailSubscriptionType;
 use AppBundle\Form\AdherentType;
 use AppBundle\Form\UnregistrationType;
 use AppBundle\History\EmailSubscriptionHistoryHandler;
+use AppBundle\Membership\AdherentChangeEmailHandler;
 use AppBundle\Membership\MembershipRequest;
 use AppBundle\Membership\MembershipRequestHandler;
 use AppBundle\Membership\UnregistrationCommand;
 use AppBundle\Repository\DonationRepository;
 use AppBundle\Repository\TransactionRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -62,6 +66,7 @@ class UserController extends Controller
         $adherent = $this->getUser();
         $membership = MembershipRequest::createFromAdherent($adherent);
         $form = $this->createForm(AdherentType::class, $membership)
+            ->remove('emailAddress')
             ->add('submit', SubmitType::class, ['label' => 'Enregistrer les modifications'])
         ;
 
@@ -72,7 +77,74 @@ class UserController extends Controller
             return $this->redirectToRoute('app_user_profile');
         }
 
-        return $this->render('adherent/profile.html.twig', ['form' => $form->createView()]);
+        return $this->render('adherent/profile.html.twig', [
+            'form' => $form->createView(),
+            'formEmail' => $this
+                ->createForm(AdherentChangeEmailType::class, null, ['action' => $this->generateUrl('app_user_change_email')])
+                ->createView(),
+        ]);
+    }
+
+    /**
+     * @Route("/modifier-email", name="app_user_change_email")
+     * @Method({"POST"})
+     */
+    public function changeEmailAction(Request $request): Response
+    {
+        $form = $this
+            ->createForm(AdherentChangeEmailType::class)
+            ->handleRequest($request)
+        ;
+
+        if (!$form->isSubmitted()) {
+            return $this->redirectToRoute('app_user_edit');
+        }
+
+        if ($form->isValid()) {
+            $token = AdherentChangeEmailToken::generate($this->getUser());
+        }
+
+        $this->addFlash('user_change_email_error', $form->getErrors(true)->current()->getMessage());
+
+        return $this->redirectToRoute('app_user_edit');
+    }
+
+    /**
+     * @Route(
+     *     path="/valider-changement-email/{adherent_uuid}/{change_email_token}",
+     *     name="user_validate_new_email",
+     *     requirements={
+     *         "adherent_uuid": "%pattern_uuid%",
+     *         "change_email_token": "%pattern_sha1%"
+     *     }
+     * )
+     * @Method("GET")
+     * @Entity("adherent", expr="repository.findOneByUuid(adherent_uuid)")
+     * @Entity("resetPasswordToken", expr="repository.findByToken(reset_password_token)")
+     */
+    public function activateNewEmailAction(
+        Request $request,
+        Adherent $adherent,
+        AdherentChangeEmailToken $token,
+        AdherentChangeEmailHandler $handler
+    ): Response {
+        if ($token->getUsageDate()) {
+            throw $this->createNotFoundException('No available email changing token.');
+        }
+
+        try {
+            $handler->handleValidationRequest($adherent, $token);
+            $this->addFlash('info', $this->get('translator')->trans('adherent.reset_password.success'));
+
+            return $this->redirectToRoute('app_user_edit');
+        } catch (AdherentTokenExpiredException $e) {
+            $this->addFlash('info', $this->get('translator')->trans('adherent.reset_password.expired_key'));
+        }
+    }
+
+        return $this->render('security/adherent_reset_password.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**

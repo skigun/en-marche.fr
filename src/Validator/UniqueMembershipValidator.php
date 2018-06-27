@@ -28,11 +28,13 @@ class UniqueMembershipValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, UniqueMembership::class);
         }
 
-        if (!$member instanceof MembershipInterface) {
+        if ($member instanceof MembershipInterface) {
+            $email = $member->getEmailAddress();
+        } elseif (is_string($member)) {
+            $email = $member;
+        } else {
             throw new UnexpectedTypeException($member, MembershipInterface::class);
         }
-
-        $email = $member->getEmailAddress();
 
         // Chosen email address is not already taken by someone else
         if (!$email || !$adherent = $this->findAdherent($email)) {
@@ -47,7 +49,7 @@ class UniqueMembershipValidator extends ConstraintValidator
                 ->context
                 ->buildViolation($constraint->message)
                 ->setParameter('{{ email }}', $email)
-                ->atPath('emailAddress')
+                //->atPath('emailAddress')
                 ->addViolation()
             ;
         }

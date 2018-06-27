@@ -89,11 +89,6 @@
 
         <div class="space--10-0"></div>
 
-        <div class="register__form--full" id="field-email-address">
-            {{ form_widget(form.emailAddress, { attr: { placeholder: 'Adresse e-mail' } }) }}
-            {{ form_errors(form.emailAddress) }}
-        </div>
-
         <div class="b__nudge--top text--small form__checkbox form__checkbox--large" id="field-com-mobile">
             {{ form_widget(form.comMobile) }}
             <label class="form form__label" for="{{ form.comMobile.vars.id }}">
@@ -118,4 +113,21 @@
             {{ form_widget(form.submit, { attr: { class: 'btn btn--blue btn--medium b__nudge--top' }}) }}
         </div>
     {{ form_end(form) }}
+
+    <p>Modifier votre adresse Email actuelle - {{ app.user.emailAddress }}</p>
+
+    {{ form_start(formEmail) }}
+        {% for flashMessage in app.flashes('user_change_email_error') %}
+            <p class="form__error">{{ flashMessage|trans }}</p>
+        {% endfor %}
+
+        <div class="register__form--full">
+            {{ form_widget(formEmail.email, { attr: { placeholder: 'Nouvelle adresse email' }}) }}
+            {{ form_errors(formEmail.email) }}
+        </div>
+
+        <div class="register__form">
+            <button type="submit" class="btn btn--green btn--medium b__nudge--top">Modifier l'adresse Email</button>
+        </div>
+    {{ form_end(formEmail) }}
 {% endblock %}
