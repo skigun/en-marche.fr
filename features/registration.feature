@@ -93,7 +93,8 @@ Feature:
 
   Scenario: I can register as a user
     Given the following fixtures are loaded:
-      | LoadReferentTagData |
+      | LoadReferentTagData      |
+      | LoadSubscriptionTypeData |
     When I am on "/inscription-utilisateur"
     And I fill in the following:
       | Prénom             | Jean-Pierre |
@@ -234,9 +235,9 @@ Feature:
     And the element "Emails de votre animateur local" should be disabled
     And the element "Être notifié(e) de la création de nouveaux projets citoyens" should be disabled
 
-    When I follow "Modifier mon profil"
+    When I press "Enregistrer les modifications"
     Then the response status code should be 200
-    And I should be on "/espace-adherent/mon-profil"
+    And I should see "Vos préférences d'e-mails ont bien été mises à jour."
 
   @javascript
   Scenario: I can become adherent with a foreign country

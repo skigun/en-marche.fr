@@ -126,7 +126,6 @@
             </argument>
         </service>
         <service id="AppBundle\Form\CommitteeAroundAdherentType"/>
-        <service id="AppBundle\Form\AdherentEmailSubscriptionType"/>
 
         <!-- GeoCoder -->
         <service id="GeoIp2\WebService\Client">
@@ -226,5 +225,8 @@
         </service>
 
         <service id="AppBundle\Security\ApiAuthenticationEntryPoint"/>
+
+        <!-- Subscription -->
+        <service id="AppBundle\Subscription\SubscriptionListener" />
     </services>
 </container>

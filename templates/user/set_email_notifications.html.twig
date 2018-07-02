@@ -5,16 +5,16 @@
         <h2>Notifications</h2>
         <br>
         <div class="b__nudge--bottom">
-            <button type="button" class="btn btn--small click-all-checkbox" data-target="{{ form.emails_subscriptions.vars.id }}">
+            <button type="button" class="btn btn--small click-all-checkbox" data-target="{{ form.subscriptionTypes.vars.id }}">
                 Tout sélectionner
             </button>
-            <button type="button" class="btn btn--small un-click-all-checkbox" data-target="{{ form.emails_subscriptions.vars.id }}">
+            <button type="button" class="btn btn--small un-click-all-checkbox" data-target="{{ form.subscriptionTypes.vars.id }}">
                 Tout désélectionner
             </button>
         </div>
 
         {{ form_errors(form) }}
-        {{ form_row(form.emails_subscriptions) }}
+        {{ form_row(form.subscriptionTypes) }}
         {{ form_row(form.citizenProjectCreationEmailSubscriptionRadius) }}
 
         <div class="b__nudge--top">
@@ -45,16 +45,14 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
-            var selectDistanceNotificationPc = $('#adherent_email_subscription_citizenProjectCreationEmailSubscriptionRadius'),
-                checkBoxNotificationPc = $('#adherent_email_subscription_emails_subscriptions_3'),
-                labelCheckBoxNotificationPc = $('label[for="adherent_email_subscription_emails_subscriptions_3"]');
+            const selectDistanceNotificationPc = $('#adherent_email_subscription_citizenProjectCreationEmailSubscriptionRadius');
+            const checkBoxNotificationPc = $('#adherent_email_subscription_subscriptionTypes_{{ cpSubscriptionType.id }}');
+            const labelCheckBoxNotificationPc = $('label[for="adherent_email_subscription_subscriptionTypes_{{ cpSubscriptionType.id }}"]');
 
             checkboxHandler();
 
             function checkboxHandler() {
-                const isCheck = checkBoxNotificationPc.is(':checked');
-
-                if (isCheck) {
+                if (checkBoxNotificationPc.is(':checked')) {
                     labelCheckBoxNotificationPc.text('');
                     labelCheckBoxNotificationPc.append(
                         $('<span>')
@@ -62,7 +60,7 @@
                             .append(selectDistanceNotificationPc)
                             .append('autour de chez moi')
                     );
-                    selectDistanceNotificationPc.children('option:selected').removeAttr("selected");
+                    selectDistanceNotificationPc.children('option:selected').removeAttr('selected');
                     selectDistanceNotificationPc.children('option[value="{{ app.user.hasCitizenProjectCreationEmailSubscription ? app.user.citizenProjectCreationEmailSubscriptionRadius : constant('CITIZEN_PROJECT_EMAIL_DEFAULT_DISTANCE', app.user) }}"]').prop('selected', true);
                     selectDistanceNotificationPc.show();
                 } else {

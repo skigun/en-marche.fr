@@ -66,11 +66,11 @@ class MembershipRequestHandler
         $this->manager->persist($adherent);
 
         $this->referentTagManager->assignReferentLocalTags($adherent);
-        $this->emailSubscriptionHistoryHandler->handleSubscriptions($adherent);
 
         $this->sendEmailValidation($adherent);
 
         $this->dispatcher->dispatch(UserEvents::USER_CREATED, new UserEvent($adherent));
+        $this->emailSubscriptionHistoryHandler->handleSubscriptions($adherent);
 
         return $adherent;
     }
@@ -92,13 +92,16 @@ class MembershipRequestHandler
         $this->manager->persist($adherent);
 
         $this->referentTagManager->assignReferentLocalTags($adherent);
-        $this->emailSubscriptionHistoryHandler->handleSubscriptions($adherent);
+
         $this->membershipRegistrationProcess->start($adherent->getUuid()->toString());
 
         $adherent->join();
         $this->sendEmailValidation($adherent);
 
         $this->dispatcher->dispatch(UserEvents::USER_CREATED, new UserEvent($adherent));
+
+        $this->emailSubscriptionHistoryHandler->handleSubscriptions($adherent);
+
         $this->dispatcher->dispatch(AdherentEvents::REGISTRATION_COMPLETED, new AdherentAccountWasCreatedEvent($adherent, $membershipRequest));
     }
 

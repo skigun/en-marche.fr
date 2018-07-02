@@ -17,7 +17,6 @@ use AppBundle\Form\EventListener\CoordinatorManagedAreaListener;
 use AppBundle\Form\EventListener\ReferentManagedAreaListener;
 use AppBundle\Form\GenderType;
 use AppBundle\Intl\UnitedNationsBundle;
-use AppBundle\Membership\AdherentEmailSubscription;
 use AppBundle\Membership\UserEvent;
 use AppBundle\Membership\UserEvents;
 use Doctrine\ORM\Query\Expr;
@@ -35,7 +34,6 @@ use Sonata\DoctrineORMAdminBundle\Datagrid\ProxyQuery;
 use Sonata\DoctrineORMAdminBundle\Filter\CallbackFilter;
 use Sonata\DoctrineORMAdminBundle\Filter\DateRangeFilter;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -151,11 +149,9 @@ class AdherentAdmin extends AbstractAdmin
                 ->add('status', null, [
                     'label' => 'Etat du compte',
                 ])
-                ->add('emailsSubscriptions', 'array', [
+                ->add('subscriptionTypes', null, [
                     'label' => 'Abonné aux mails',
-                ])
-                ->add('hasSubscribedLocalHostEmails', 'boolean', [
-                    'label' => 'Abonné aux mails de comités ?',
+                    'associated_property' => 'label',
                 ])
                 ->add('comMobile', 'boolean', [
                     'label' => 'Accepte de recevoir des SMS de la part d\'En Marche !',
@@ -228,15 +224,11 @@ class AdherentAdmin extends AbstractAdmin
                         'Désactivé' => Adherent::DISABLED,
                     ],
                 ])
-                ->add('emailsSubscriptions', ChoiceType::class, [
-                    'choices' => AdherentEmailSubscription::SUBSCRIPTIONS,
+                ->add('subscriptionTypes', null, [
                     'label' => 'Abonné aux mails :',
+                    'choice_label' => 'label',
                     'required' => false,
                     'multiple' => true,
-                ])
-                ->add('hasSubscribedLocalHostEmails', CheckboxType::class, [
-                    'label' => 'Abonné aux mails de comités ?',
-                    'required' => false,
                 ])
             ->end()
             ->with('Référent', ['class' => 'col-md-6'])
@@ -490,7 +482,7 @@ class AdherentAdmin extends AbstractAdmin
     public function setSubject($subject)
     {
         if (null === $this->oldEmailsSubscriptions) {
-            $this->oldEmailsSubscriptions = $subject->getEmailsSubscriptions();
+            $this->oldEmailsSubscriptions = $subject->getSubscriptionTypes();
         }
         parent::setSubject($subject);
     }
@@ -533,10 +525,6 @@ class AdherentAdmin extends AbstractAdmin
             ])
             ->add('postAddress.country', null, [
                 'label' => 'Pays',
-            ])
-            ->add('emailsSubscriptions', 'array', [
-                'label' => 'Accepte les e-mails',
-                'inline' => false,
             ])
             ->add('comMobile', 'boolean', [
                 'label' => 'Accepte les SMS',
